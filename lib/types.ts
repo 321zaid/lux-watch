@@ -1,8 +1,6 @@
 export type CollectionSlug =
-  | "meridian"
-  | "nocturne"
-  | "serie-limitee"
-  | "aurora";
+  | "tissot"
+  | "tag-heuer";
 
 export interface ProductSpec {
   label: string;

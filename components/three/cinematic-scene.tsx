@@ -354,15 +354,12 @@ function AmbientDust({ count, scale }: { count: number; scale: [number, number, 
     const pts = sparkles.current;
     if (!pts) return;
     pts.visible = p < 0.78;
-    // The gold field never sits still: a slow drift while the entrance reveal
-    // plays, settling to a calmer sway once the scroll film owns the canvas.
+    // The gold field never sits still: a perpetual slow drift, livelier during
+    // the entrance reveal, calmer once the scroll film owns the canvas.
     const t = clock.getElapsedTime();
-    if (scrollStore.introActive) {
-      pts.rotation.y = Math.sin(t * 0.12) * 0.1;
-      pts.rotation.z = Math.cos(t * 0.09) * 0.05;
-    } else {
-      pts.rotation.y = Math.sin(t * 0.05) * 0.03;
-    }
+    const drift = scrollStore.introActive ? 1 : 0.6;
+    pts.rotation.y = Math.sin(t * 0.06) * 0.14 * drift;
+    pts.rotation.z = Math.cos(t * 0.045) * 0.07 * drift;
     // Transition energy: high mid-beat, low at each keyframe. Sum of triangle
     // impulses centered on every shot except the freeze hold.
     let energy = 0;
@@ -417,7 +414,14 @@ function FrameDriver() {
 
   useEffect(() => {
     let raf = 0;
-    const loop = () => {
+    let last = 0;
+    const loop = (now: number) => {
+      // The gold field never freezes: while it is on screen (before the dissolve)
+      // keep a slow steady render so the orbs drift even with zero scroll input.
+      if (scrollStore.progress < 0.78 && now - last > 33) {
+        last = now;
+        invalidate();
+      }
       // Render continuously while the entrance reveal plays (time-driven), then
       // settle back into demand mode: idle = zero GPU work.
       if (scrollStore.introActive || settleUntil.current > performance.now()) invalidate();
