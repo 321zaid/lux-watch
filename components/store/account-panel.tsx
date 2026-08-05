@@ -4,11 +4,36 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, LogOut, Package } from "lucide-react";
-import { demoAuth, type DemoOrder } from "@/lib/demo-auth";
+import { demoAuth } from "@/lib/demo-auth";
+import { getSupabaseBrowser, isSupabaseConfigured } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/toaster";
 import { cn, formatPrice } from "@/lib/utils";
 
 type Mode = "signin" | "signup";
+
+type Session = { email: string; name: string; id?: string };
+
+type DisplayOrder = {
+  id: string;
+  createdAt: string;
+  totalCents: number;
+  items: { name: string; variantName: string; quantity: number; priceCents: number }[];
+};
+
+const live = isSupabaseConfigured();
+
+type AuthUser = { id?: string; email?: string; user_metadata?: { full_name?: string } };
+
+type OrderRow = { id: string; created_at: string; total_cents?: number; items?: DisplayOrder["items"] };
+
+function toDisplayOrder(row: OrderRow): DisplayOrder {
+  return {
+    id: row.id,
+    createdAt: row.created_at,
+    totalCents: row.total_cents ?? 0,
+    items: row.items ?? [],
+  };
+}
 
 export function AccountPanel() {
   const { toast } = useToast();
@@ -17,29 +42,96 @@ export function AccountPanel() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [session, setSession] = useState(demoAuth.session());
-  const [orders, setOrders] = useState<DemoOrder[]>([]);
+  const [session, setSession] = useState<Session | null>(() => {
+    if (live) return null;
+    const s = demoAuth.session();
+    return s ? { email: s.email, name: s.name } : null;
+  });
+  const [orders, setOrders] = useState<DisplayOrder[]>(() => (live ? [] : demoAuth.orders()));
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    // Refresh order history when the session changes (mount + sign in/out).
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOrders(demoAuth.orders());
+    if (!live) return;
+    const sb = getSupabaseBrowser();
+    if (!sb) return;
+    const fromUser = (u: AuthUser | null): Session | null =>
+      u ? { id: u.id, email: u.email ?? "", name: (u.user_metadata?.full_name ?? u.email ?? "").split("@")[0] } : null;
+    let mounted = true;
+    sb.auth.getSession().then(({ data }: { data: { session: { user: AuthUser } | null } }) => {
+      if (mounted) setSession(fromUser(data.session?.user ?? null));
+    });
+    const { data: sub } = sb.auth.onAuthStateChange((_e: string, s: { user: AuthUser } | null) => {
+      if (mounted) setSession(fromUser(s?.user ?? null));
+    });
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!live || !session?.id) return;
+    const sb = getSupabaseBrowser();
+    if (!sb) return;
+    let cancelled = false;
+    sb.from("orders")
+      .select("*")
+      .eq("user_id", session.id)
+      .order("created_at", { ascending: false })
+      .then(({ data }: { data: OrderRow[] | null }) => {
+        if (!cancelled) setOrders((data ?? []).map(toDisplayOrder));
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [session]);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    const result =
-      mode === "signup" ? demoAuth.signUp(email, password, name) : demoAuth.signIn(email, password);
-    setBusy(false);
-    if (result.error) return toast(result.error, "error");
-    toast(mode === "signup" ? "Welcome to the maison." : "Welcome back.");
-    setSession(demoAuth.session());
+    try {
+      if (!live) {
+        const result =
+          mode === "signup" ? demoAuth.signUp(email, password, name) : demoAuth.signIn(email, password);
+        if (result.error) return toast(result.error, "error");
+        toast(mode === "signup" ? "Welcome to the maison." : "Welcome back.");
+        setSession({ email, name: name || email.split("@")[0] });
+        setOrders(demoAuth.orders());
+        router.refresh();
+        return;
+      }
+      const sb = getSupabaseBrowser();
+      if (!sb) return;
+      if (mode === "signup") {
+        const { data, error } = await sb.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: name } },
+        });
+        if (error) return toast(error.message, "error");
+        if (data.session) {
+          toast("Welcome to the maison.");
+          router.refresh();
+          return;
+        }
+        const { error: signInError } = await sb.auth.signInWithPassword({ email, password });
+        if (signInError) toast("Check your inbox to confirm your account.");
+        else toast("Welcome to the maison.");
+        router.refresh();
+      } else {
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) return toast(error.message, "error");
+        toast("Welcome back.");
+        router.refresh();
+      }
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const signOut = () => {
-    demoAuth.signOut();
+  const signOut = async () => {
+    if (live) await getSupabaseBrowser()?.auth.signOut();
+    else demoAuth.signOut();
     setSession(null);
     setOrders([]);
     toast("Signed out. Until next time.");
@@ -156,10 +248,12 @@ export function AccountPanel() {
           {mode === "signin" ? "Create an account" : "Sign in"}
         </button>
       </p>
-      <p className="mt-8 rounded-sm border border-ink/10 bg-parchment p-4 font-body text-xs leading-relaxed text-smoke">
-        Demo mode is active — accounts and orders are stored on this device. Connect Supabase
-        (see <code className="text-ink">.env.example</code>) to enable cloud auth &amp; order sync.
-      </p>
+      {!live && (
+        <p className="mt-8 rounded-sm border border-ink/10 bg-parchment p-4 font-body text-xs leading-relaxed text-smoke">
+          Demo mode is active — accounts and orders are stored on this device. Connect Supabase
+          (see <code className="text-ink">.env.example</code>) to enable cloud auth &amp; order sync.
+        </p>
+      )}
     </div>
   );
 }

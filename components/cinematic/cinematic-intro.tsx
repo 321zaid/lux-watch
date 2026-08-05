@@ -147,7 +147,7 @@ export function CinematicIntro() {
         <div className="absolute inset-0">
           {ready && (
             <Canvas
-              dpr={[1, 1.5]}
+              dpr={[1, 2]}
               frameloop="demand"
               camera={{ position: [3.6, 1.5, 3.6], fov: 31, near: 0.1, far: 60 }}
               gl={{ antialias: false, powerPreference: "high-performance" }}

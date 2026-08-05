@@ -14,7 +14,7 @@ import {
   Lightformer,
   AdaptiveDpr,
 } from "@react-three/drei";
-import { EffectComposer, Bloom, DepthOfField, Vignette } from "@react-three/postprocessing";
+import { EffectComposer, Bloom, DepthOfField, Vignette, SMAA } from "@react-three/postprocessing";
 import { scrollStore } from "@/lib/scroll-store";
 
 // Draco decoder is served locally (public/draco) — no runtime CDN dependency.
@@ -149,6 +149,7 @@ function WatchRig() {
   const model = useNormalizedModel();
   const group = useRef<THREE.Group>(null);
   const matRefs = useRef<{ mat: THREE.MeshStandardMaterial; baseOpacity: number }[]>([]);
+  const gl = useThree((s) => s.gl);
 
   useEffect(() => {
     matRefs.current = [];
@@ -175,9 +176,11 @@ function WatchRig() {
           std.envMapIntensity = 1.35;
           matRefs.current.push({ mat: std, baseOpacity: 1 });
         }
+        const map = std.map;
+        if (map) map.anisotropy = gl.capabilities.getMaxAnisotropy();
       });
     });
-  }, [model]);
+  }, [model, gl]);
 
   useFrame(() => {
     const p = scrollStore.progress;
@@ -441,12 +444,15 @@ export function CinematicScene() {
   const dust = isMobile ? 140 : 220;
 
   const effects: ReactElement[] = [
-    ...(isSmall ? [] : [<DepthOfField key="dof" focusDistance={0.02} focalLength={0.055} bokehScale={2.4} />]),
+    <SMAA key="smaa" />,
+    ...(isSmall
+      ? []
+      : [<DepthOfField key="dof" focusDistance={0.045} focalLength={0.12} bokehScale={1.5} />]),
     <Bloom
       key="bloom"
-      intensity={isMobile ? 0.45 : 0.55}
-      luminanceThreshold={0.72}
-      luminanceSmoothing={0.6}
+      intensity={isMobile ? 0.35 : 0.42}
+      luminanceThreshold={0.85}
+      luminanceSmoothing={0.5}
       mipmapBlur
       radius={0.7}
     />,
@@ -468,7 +474,7 @@ export function CinematicScene() {
       <AmbientDust count={dust} scale={[7, 5, 7]} />
       <CameraRig />
       <FrameDriver />
-      <AdaptiveDpr pixelated />
+      <AdaptiveDpr pixelated={false} />
       <EffectComposer multisampling={isMobile ? 0 : 4}>{effects}</EffectComposer>
     </>
   );

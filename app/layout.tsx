@@ -6,6 +6,7 @@ import { LenisProvider } from "@/components/animations/lenis";
 import { CartProvider } from "@/components/store/cart-context";
 import { RevealProvider } from "@/components/animations/reveal-provider";
 import { Toaster } from "@/components/ui/toaster";
+import { CookieConsent } from "@/components/store/cookie-consent";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -58,6 +59,7 @@ export default function RootLayout({
             <RevealProvider>
               {children}
               <Toaster />
+              <CookieConsent />
             </RevealProvider>
           </CartProvider>
         </LenisProvider>

@@ -5,20 +5,18 @@ import { useState } from "react";
 import { AtSign, Globe } from "lucide-react";
 import { brand } from "@/lib/brand.config";
 import { useToast } from "@/components/ui/toaster";
+import { openCookieSettings } from "@/components/store/cookie-consent";
 
 const LINKS = [
-  { name: "Meridian", href: "/collection?collection=meridian" },
-  { name: "Nocturne", href: "/collection?collection=nocturne" },
-  { name: "Série Limitée", href: "/collection?collection=serie-limitee" },
-  { name: "Aurora", href: "/collection?collection=aurora" },
+  { name: "Tissot", href: "/collection?collection=tissot" },
+  { name: "Tag Heuer", href: "/collection?collection=tag-heuer" },
   { name: "All watches", href: "/collection" },
 ];
 
 const SERVICES = [
   { name: "Account", href: "/account" },
   { name: "Wishlist", href: "/wishlist" },
-  { name: "Shipping & returns", href: "/collection" },
-  { name: "Care & servicing", href: "/collection" },
+  { name: "Privacy policy", href: "/privacy" },
 ];
 
 function FooterColumn({ title, links }: { title: string; links: typeof LINKS }) {
@@ -41,13 +39,31 @@ function FooterColumn({ title, links }: { title: string; links: typeof LINKS }) 
 function Newsletter() {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
         if (!email.includes("@")) return toast("Please enter a valid email address", "error");
-        toast("Welcome to the maison. Your first letter is on its way.");
-        setEmail("");
+        setBusy(true);
+        try {
+          const res = await fetch("/api/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || data?.ok === false) {
+            toast(data?.error ?? "Something went wrong. Please try again.", "error");
+            return;
+          }
+          toast("Welcome to the maison. Your first letter is on its way.");
+          setEmail("");
+        } catch {
+          toast("Something went wrong. Please try again.", "error");
+        } finally {
+          setBusy(false);
+        }
       }}
       className="mt-5 flex items-center gap-3 border-b border-ink/25 pb-2 focus-within:border-gold"
     >
@@ -57,10 +73,15 @@ function Newsletter() {
         onChange={(e) => setEmail(e.target.value)}
         placeholder="your@email.com"
         aria-label="Email address"
+        disabled={busy}
         className="w-full bg-transparent font-body text-sm text-ink outline-none placeholder:text-smoke/70"
       />
-      <button type="submit" className="shrink-0 font-body text-[10px] uppercase tracking-[0.3em] text-gold hover:text-gold-dark">
-        Join
+      <button
+        type="submit"
+        disabled={busy}
+        className="shrink-0 font-body text-[10px] uppercase tracking-[0.3em] text-gold hover:text-gold-dark disabled:opacity-50"
+      >
+        {busy ? "One moment" : "Join"}
       </button>
     </form>
   );
@@ -100,6 +121,13 @@ export function Footer() {
         </div>
         <div className="md:col-span-2">
           <FooterColumn title="Client care" links={SERVICES} />
+          <button
+            type="button"
+            onClick={openCookieSettings}
+            className="mt-2.5 font-body text-sm text-smoke transition-colors hover:text-gold-dark"
+          >
+            Cookie preferences
+          </button>
         </div>
         <div className="md:col-span-3">
           <h4 className="font-body text-[11px] uppercase tracking-[0.3em] text-ink">The Journal</h4>

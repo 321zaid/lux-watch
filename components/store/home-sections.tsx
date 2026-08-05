@@ -287,6 +287,7 @@ export function StoreHomeSections() {
 function NewsletterBand() {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
   return (
     <section className="bg-midnight py-20 text-ivory">
       <Container className="flex flex-col items-center text-center">
@@ -302,11 +303,28 @@ function NewsletterBand() {
         <form
           data-reveal
           data-reveal-delay="220"
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
             if (!email.includes("@")) return toast("Please enter a valid address", "error");
-            toast("Welcome to the maison.");
-            setEmail("");
+            setBusy(true);
+            try {
+              const res = await fetch("/api/subscribe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+              });
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok || data?.ok === false) {
+                toast(data?.error ?? "Something went wrong. Please try again.", "error");
+                return;
+              }
+              toast("Welcome to the maison.");
+              setEmail("");
+            } catch {
+              toast("Something went wrong. Please try again.", "error");
+            } finally {
+              setBusy(false);
+            }
           }}
           className="mt-8 flex w-full max-w-md items-center gap-4 border-b border-ivory/30 pb-3 focus-within:border-gold"
         >
@@ -316,10 +334,11 @@ function NewsletterBand() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
             aria-label="Email"
+            disabled={busy}
             className="w-full bg-transparent font-body text-base text-ivory outline-none placeholder:text-ivory/40"
           />
-          <button type="submit" className="shrink-0 font-body text-[11px] uppercase tracking-[0.3em] text-gold-light hover:text-ivory">
-            Subscribe
+          <button type="submit" disabled={busy} className="shrink-0 font-body text-[11px] uppercase tracking-[0.3em] text-gold-light hover:text-ivory disabled:opacity-50">
+            {busy ? "One moment" : "Subscribe"}
           </button>
         </form>
       </Container>

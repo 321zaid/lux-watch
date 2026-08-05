@@ -11,6 +11,9 @@ export const brand = {
   social: {
     instagram: "@infinity.horlogerie",
   },
+  contact: {
+    email: "care@infinity-horlogerie.example",
+  },
 } as const;
 
 /** Design tokens exposed to CSS variable names. */
