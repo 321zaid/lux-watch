@@ -65,7 +65,7 @@ export function StoreHomeSections() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/products/shot-front.webp"
-              alt="ASTRA Meridian One watch"
+              alt="INFINITY Meridian One watch"
               className="mx-auto w-full max-w-sm object-contain mix-blend-multiply lg:max-w-md"
             />
             <div className="absolute -left-4 top-10 hidden rotate-2 border border-ink/10 bg-ivory px-5 py-4 shadow-sm lg:block" aria-hidden>
@@ -184,7 +184,7 @@ export function StoreHomeSections() {
             <Eyebrow className="justify-center">Craft</Eyebrow>
             <h2 className="mt-4 font-display text-4xl md:text-5xl">Three hundred and ninety</h2>
             <p className="mt-5 font-body text-lg text-smoke">
-              The pieces of an ASTRA — and the hours that disappear inside them.
+              The pieces of an INFINITY — and the hours that disappear inside them.
             </p>
           </div>
           <div className="grid grid-cols-1 gap-px overflow-hidden border border-ink/10 bg-ink/10 md:grid-cols-3">

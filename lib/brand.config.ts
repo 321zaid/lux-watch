@@ -1,15 +1,15 @@
 /** Central brand identity — every brand string lives here. */
 export const brand = {
-  name: "ASTRA",
-  legalName: "ASTRA Horlogerie",
+  name: "INFINITY",
+  legalName: "Infinity Horlogerie",
   tagline: "Crafted Beyond Time",
-  signature: "Astra", // signature-style mark rendered with the script font
+  signature: "Infinity", // signature-style mark rendered with the script font
   description:
-    "ASTRA is an independent horology house forging timepieces in small series — cinematic engineering, restraint, and decades of promise in every movement.",
+    "INFINITY is an independent horology house forging timepieces in small series — cinematic engineering, restraint, and decades of promise in every movement.",
   since: "MMXXIV",
-  url: "https://astra-horlogerie.example",
+  url: "https://infinity-horlogerie.example",
   social: {
-    instagram: "@astra.horlogerie",
+    instagram: "@infinity.horlogerie",
   },
 } as const;
 

@@ -23,7 +23,7 @@ export const collections: Collection[] = [
     name: "Meridian",
     eyebrow: "The quintessential collection",
     description:
-      "Steel cases, hand-finished dials, and a precision born in the workshop. The Meridian is ASTRA's point of entry — and its point of reference.",
+      "Steel cases, hand-finished dials, and a precision born in the workshop. The Meridian is INFINITY's point of entry — and its point of reference.",
     heroImage: "/products/shot-angle.webp",
   },
   {

@@ -112,7 +112,7 @@ export function Footer() {
       <div className="border-t border-ink/10">
         <div className="mx-auto flex w-full max-w-[1440px] flex-col items-center justify-between gap-3 px-6 py-6 md:flex-row md:px-10 lg:px-16">
           <p className="font-body text-xs text-smoke">
-            © {new Date().getFullYear()} ASTRA Horlogerie — {brand.tagline}.
+            © {new Date().getFullYear()} {brand.legalName} — {brand.tagline}.
           </p>
           <p className="font-body text-xs tracking-[0.3em] text-smoke">GENEVA · {brand.since}</p>
         </div>

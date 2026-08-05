@@ -83,6 +83,13 @@ export function CinematicIntro() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  // Kick off the entrance reveal (gold field drifting, watch fading in). It is
+  // time-driven so the hero is alive on arrival, before any scroll happens.
+  useEffect(() => {
+    scrollStore.beginIntro();
+    return () => scrollStore.cancelIntro();
+  }, []);
+
   useEffect(() => {
     if (!wrapRef.current) return;
     const ctx = gsap.context(() => {

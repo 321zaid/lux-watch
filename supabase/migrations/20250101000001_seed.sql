@@ -1,11 +1,11 @@
--- ASTRA Horlogerie — catalog seed v1
+-- Infinity Horlogerie — catalog seed v1
 -- Mirrors data/products.ts (12 models, 4 collections) so the live path matches the seed.
 -- Idempotent: skips rows whose unique key already exists.
 
 -- Collections
 insert into public.collections (id, slug, name, eyebrow, description, hero_image)
 values
-  ('20000000-0000-4000-8000-000000000001'::uuid, 'meridian',      'Meridian',      'The quintessential collection', 'Steel cases, hand-finished dials, and a precision born in the workshop. The Meridian is ASTRA''s point of entry — and its point of reference.', '/products/shot-angle.webp'),
+  ('20000000-0000-4000-8000-000000000001'::uuid, 'meridian',      'Meridian',      'The quintessential collection', 'Steel cases, hand-finished dials, and a precision born in the workshop. The Meridian is INFINITY''s point of entry — and its point of reference.', '/products/shot-angle.webp'),
   ('20000000-0000-4000-8000-000000000002'::uuid, 'nocturne',      'Nocturne',      'Dressed in shadow',            'High-contrast, bold, and quietly theatrical. Nocturne pairs midnight dials with applied gold indices and sweeping seconds in deep anthracite.', '/products/watch-navy.webp'),
   ('20000000-0000-4000-8000-000000000003'::uuid, 'serie-limitee', 'Série Limitée', 'Small series, numbered',       'No more than fifty of each. Each piece engraved with its own number, finished by a single maker from crown to clasp.', '/products/watch-gold.webp'),
   ('20000000-0000-4000-8000-000000000004'::uuid, 'aurora',        'Aurora',        'Companion to the day',         'Proportioned for the wrist, luminous in spirit. Aurora is our collection for those who dress light and live long.', '/products/watch-rose.webp')

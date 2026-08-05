@@ -10,7 +10,7 @@ import { brand } from "@/lib/brand.config";
 
 export const metadata: Metadata = {
   title: "The Collection",
-  description: "Browse the ASTRA collections — Meridian, Nocturne, Série Limitée and Aurora.",
+  description: "Browse the INFINITY collections — Meridian, Nocturne, Série Limitée and Aurora.",
 };
 
 export default function CollectionPage({

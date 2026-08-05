@@ -103,6 +103,13 @@ function CameraRig() {
       sample(SHOTS, p, (s) => s.target[2])
     );
     const f = sample(SHOTS, p, (s) => s.fov);
+    // Entrance breath: while the reveal is playing the establishment shot
+    // floats gently so the entry never feels static.
+    if (scrollStore.introActive) {
+      const t = performance.now() * 0.001;
+      pos.current.y += Math.sin(t * 0.5) * 0.03;
+      look.current.y += Math.sin(t * 0.4) * 0.008;
+    }
     // Whip-pan: a single punctuated fast move accelerating into the 0.46 peak
     // (arc from dial to reflection sweep), then easing back out. Everywhere else
     // the camera glides at the base lerp rate.
@@ -175,6 +182,10 @@ function WatchRig() {
   useFrame(() => {
     const p = scrollStore.progress;
     if (!group.current) return;
+    // Entrance reveal: the watch is absent for a beat, then rises and fades in
+    // as the gold field drifts — the site breathes on arrival instead of
+    // sitting static. Scroll takes over once the film begins.
+    const reveal = THREE.MathUtils.smoothstep(scrollStore.intro, 0.12, 0.62);
     const frozen = p > 0.72;
     group.current.rotation.y = frozenYaw(p);
     group.current.rotation.x = frozenPitch(p);
@@ -185,10 +196,11 @@ function WatchRig() {
     const breathe = 1 + idle * 0.006;
     const dissolve = THREE.MathUtils.clamp((p - 0.8) / 0.14, 0, 1);
     const ease = 1 - Math.pow(1 - dissolve, 3);
-    group.current.scale.setScalar((1 - 0.24 * ease) * breathe);
+    group.current.scale.setScalar((1 - 0.24 * ease) * breathe * (0.5 + 0.5 * reveal));
+    group.current.position.y = (1 - reveal) * 0.35;
     const fade = THREE.MathUtils.clamp((p - 0.86) / 0.1, 0, 1);
     matRefs.current.forEach(({ mat, baseOpacity }) => {
-      mat.opacity = baseOpacity * (1 - fade);
+      mat.opacity = baseOpacity * reveal * (1 - fade);
       mat.transparent = true;
     });
   });
@@ -337,11 +349,20 @@ function DissolveParticles({ count = 2600 }: { count?: number }) {
 function AmbientDust({ count, scale }: { count: number; scale: [number, number, number] }) {
   const sparkles = useRef<THREE.Points>(null);
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
     const p = scrollStore.progress;
     const pts = sparkles.current;
     if (!pts) return;
     pts.visible = p < 0.78;
+    // The gold field never sits still: a slow drift while the entrance reveal
+    // plays, settling to a calmer sway once the scroll film owns the canvas.
+    const t = clock.getElapsedTime();
+    if (scrollStore.introActive) {
+      pts.rotation.y = Math.sin(t * 0.12) * 0.1;
+      pts.rotation.z = Math.cos(t * 0.09) * 0.05;
+    } else {
+      pts.rotation.y = Math.sin(t * 0.05) * 0.03;
+    }
     // Transition energy: high mid-beat, low at each keyframe. Sum of triangle
     // impulses centered on every shot except the freeze hold.
     let energy = 0;
@@ -350,7 +371,7 @@ function AmbientDust({ count, scale }: { count: number; scale: [number, number, 
       const d = Math.abs(p - s.t);
       energy += Math.max(0, 1 - d / 0.09);
     }
-    const target = 0.22 + 0.3 * Math.min(1, energy);
+    const target = 0.22 + 0.3 * Math.min(1, energy) + (scrollStore.introActive ? 0.28 : 0);
     const attr = pts.geometry.getAttribute("opacity") as THREE.BufferAttribute | undefined;
     if (attr) {
       const a = attr.array as Float32Array;
@@ -359,7 +380,7 @@ function AmbientDust({ count, scale }: { count: number; scale: [number, number, 
     }
   });
 
-  return <Sparkles ref={sparkles} count={count} scale={scale} size={1.6} speed={0.4} opacity={0.4} color="#cfc6b4" />;
+  return <Sparkles ref={sparkles} count={count} scale={scale} size={1.6} speed={0.5} opacity={0.4} color="#cfc6b4" />;
 }
 
 function StudioLighting() {
@@ -397,7 +418,9 @@ function FrameDriver() {
   useEffect(() => {
     let raf = 0;
     const loop = () => {
-      if (settleUntil.current > performance.now()) invalidate();
+      // Render continuously while the entrance reveal plays (time-driven), then
+      // settle back into demand mode: idle = zero GPU work.
+      if (scrollStore.introActive || settleUntil.current > performance.now()) invalidate();
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);

@@ -1,4 +1,4 @@
--- ASTRA Horlogerie — schema v1
+-- Infinity Horlogerie — schema v1
 -- Applied via `supabase db push` against a local or hosted project.
 
 create extension if not exists "uuid-ossp";

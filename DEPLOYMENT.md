@@ -1,4 +1,4 @@
-# Deployment guide — ASTRA Horlogerie
+# Deployment guide — Infinity Horlogerie
 
 Everything needed to take the store from demo mode to production across **Supabase**, **Stripe**, **Resend**, and **Vercel**.
 
@@ -47,7 +47,7 @@ The store is dual-mode: with `.env.local` empty it ships demo data and simulated
 ## 3. Resend (transactional email)
 
 1. Create an account at [resend.com](https://resend.com).
-2. Add and verify your sending domain (e.g. `astra-horlogerie.com`).
+2. Add and verify your sending domain (e.g. `infinity-horlogerie.com`).
 3. Copy:
    - `RESEND_API_KEY`
    - `RESEND_DOMAIN` — the verified domain

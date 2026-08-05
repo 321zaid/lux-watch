@@ -1,4 +1,4 @@
-# ASTRA Horlogerie
+# Infinity Horlogerie
 
 An independent-horology storefront: a WebGL cinematic landing, a full e-commerce flow (cart → Stripe checkout → confirmation email → order history), demo auth, and a live Supabase tier behind a config swap.
 

@@ -6,7 +6,7 @@ import { Container } from "@/components/ui/primitives";
 
 export const metadata: Metadata = {
   title: "Account",
-  description: "Sign in to ASTRA — order history and client care.",
+  description: "Sign in to INFINITY — order history and client care.",
 };
 
 export default function AccountPage() {

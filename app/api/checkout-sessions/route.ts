@@ -33,7 +33,7 @@ export async function POST(req: Request) {
           unit_amount: item.priceCents,
           product_data: {
             name: `${item.name} — ${item.variantName}`,
-            metadata: { brand: "ASTRA" },
+            metadata: { brand: "INFINITY" },
           },
         },
       })),
