@@ -1,0 +1,114 @@
+{
+  "scene": [],
+  "images": [
+    {
+      "name": "2048x2048_Image_3",
+      "w": 1024,
+      "h": 1024,
+      "channels": 4,
+      "filepath": ""
+    },
+    {
+      "name": "2048x2048_Image_5",
+      "w": 1024,
+      "h": 1024,
+      "channels": 4,
+      "filepath": ""
+    },
+    {
+      "name": "Image_1-metal-orm",
+      "w": 1024,
+      "h": 1024,
+      "channels": 4,
+      "filepath": ""
+    },
+    {
+      "name": "Image_4-2048x2048_Image_4",
+      "w": 1024,
+      "h": 1024,
+      "channels": 4,
+      "filepath": ""
+    },
+    {
+      "name": "metal-base",
+      "w": 2048,
+      "h": 2048,
+      "channels": 4,
+      "filepath": ""
+    },
+    {
+      "name": "metal-normal",
+      "w": 1024,
+      "h": 1024,
+      "channels": 4,
+      "filepath": ""
+    }
+  ],
+  "materials": [
+    {
+      "name": "Glass",
+      "use_nodes": true,
+      "texture_nodes": [
+        {
+          "node": "Image Texture",
+          "image": "2048x2048_Image_3"
+        },
+        {
+          "node": "Image Texture.001",
+          "image": "Image_4-2048x2048_Image_4"
+        },
+        {
+          "node": "Image Texture.002",
+          "image": "2048x2048_Image_5"
+        },
+        {
+          "node": "Image Texture.003",
+          "image": "Image_4-2048x2048_Image_4"
+        }
+      ]
+    },
+    {
+      "name": "metal",
+      "use_nodes": true,
+      "texture_nodes": [
+        {
+          "node": "Image Texture",
+          "image": "metal-base"
+        },
+        {
+          "node": "Image Texture.001",
+          "image": "Image_1-metal-orm"
+        },
+        {
+          "node": "Image Texture.002",
+          "image": "metal-normal"
+        },
+        {
+          "node": "Image Texture.003",
+          "image": "Image_1-metal-orm"
+        }
+      ]
+    }
+  ],
+  "meshes": [
+    {
+      "name": "defaultMaterial",
+      "triangles": 466,
+      "verts": 293,
+      "materials": [
+        "Glass"
+      ],
+      "has_uv": true
+    },
+    {
+      "name": "defaultMaterial.001",
+      "triangles": 31531,
+      "verts": 25112,
+      "materials": [
+        "metal"
+      ],
+      "has_uv": true
+    }
+  ],
+  "total_triangles": 31997
+}
